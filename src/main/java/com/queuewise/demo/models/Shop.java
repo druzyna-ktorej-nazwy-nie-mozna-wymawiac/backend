@@ -20,7 +20,6 @@ public class Shop {
     @Column(name = "closing_hour")
     private String closingHour;
 
-    private String traffic;
     private String lat;
     private String lng;
 
@@ -67,14 +66,6 @@ public class Shop {
 
     public void setClosingHour(String closingHour) {
         this.closingHour = closingHour;
-    }
-
-    public String getTraffic() {
-        return traffic;
-    }
-
-    public void setTraffic(String traffic) {
-        this.traffic = traffic;
     }
 
     public String getLat() {
