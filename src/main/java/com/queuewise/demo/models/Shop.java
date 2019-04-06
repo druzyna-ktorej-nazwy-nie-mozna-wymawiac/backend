@@ -20,9 +20,11 @@ public class Shop {
     @Column(name = "closing_hour")
     private String closingHour;
 
-    private String traffic;
     private String lat;
     private String lng;
+
+    @Column(name = "open_sundays")
+    private Boolean openOnSundays;
 
     Shop() {
 
@@ -69,14 +71,6 @@ public class Shop {
         this.closingHour = closingHour;
     }
 
-    public String getTraffic() {
-        return traffic;
-    }
-
-    public void setTraffic(String traffic) {
-        this.traffic = traffic;
-    }
-
     public String getLat() {
         return lat;
     }
@@ -91,6 +85,14 @@ public class Shop {
 
     public void setLng(String lng) {
         this.lng = lng;
+    }
+
+    public Boolean isOpenOnSundays() {
+        return openOnSundays;
+    }
+
+    public void setOpenOnSundays(Boolean openOnSundays) {
+        this.openOnSundays = openOnSundays;
     }
 }
 
