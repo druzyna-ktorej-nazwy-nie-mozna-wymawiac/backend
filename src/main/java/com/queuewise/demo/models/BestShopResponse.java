@@ -2,34 +2,40 @@ package com.queuewise.demo.models;
 
 public class BestShopResponse {
 
-    private Shop bestByDistance;
-    private Shop bestByTime;
-    private Shop bestOverall;
+    private ShopResponseField bestNearest;
+
+
+    private ShopResponseField bestNow;
+
+
+    private ShopResponseField bestOverall;
+
 
     public BestShopResponse() {
     }
 
-    public Shop getBestByDistance() {
-        return bestByDistance;
+
+    public ShopResponseField getBestNearest() {
+        return bestNearest;
     }
 
-    public void setBestByDistance(Shop bestByDistance) {
-        this.bestByDistance = bestByDistance;
+    public void setBestNearest(ShopResponseField bestNearest) {
+        this.bestNearest = bestNearest;
     }
 
-    public Shop getBestByTime() {
-        return bestByTime;
+    public ShopResponseField getBestNow() {
+        return bestNow;
     }
 
-    public void setBestByTime(Shop bestByTime) {
-        this.bestByTime = bestByTime;
+    public void setBestNow(ShopResponseField bestNow) {
+        this.bestNow = bestNow;
     }
 
-    public Shop getBestOverall() {
+    public ShopResponseField getBestOverall() {
         return bestOverall;
     }
 
-    public void setBestOverall(Shop bestOverall) {
+    public void setBestOverall(ShopResponseField bestOverall) {
         this.bestOverall = bestOverall;
     }
 }
