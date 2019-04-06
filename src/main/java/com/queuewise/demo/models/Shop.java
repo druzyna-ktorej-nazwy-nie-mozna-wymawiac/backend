@@ -23,6 +23,9 @@ public class Shop {
     private String lat;
     private String lng;
 
+    @Column(name = "open_sundays")
+    private Boolean openOnSundays;
+
     Shop() {
 
     }
@@ -82,6 +85,14 @@ public class Shop {
 
     public void setLng(String lng) {
         this.lng = lng;
+    }
+
+    public Boolean isOpenOnSundays() {
+        return openOnSundays;
+    }
+
+    public void setOpenOnSundays(Boolean openOnSundays) {
+        this.openOnSundays = openOnSundays;
     }
 }
 

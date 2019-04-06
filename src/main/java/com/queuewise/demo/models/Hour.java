@@ -1,16 +1,13 @@
 package com.queuewise.demo.models;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "hours")
 public class Hour {
 
     @Id
-    Integer id;
+    private Integer id;
 
     @Column(name = "shop_id")
     private
@@ -19,7 +16,11 @@ public class Hour {
     private Integer hour;
     private Integer traffic;
 
-    Hour() {
+    public Hour() {
+    }
+
+    public Hour(Integer id) {
+        this.id = id;
     }
 
     public Integer getShopId() {
