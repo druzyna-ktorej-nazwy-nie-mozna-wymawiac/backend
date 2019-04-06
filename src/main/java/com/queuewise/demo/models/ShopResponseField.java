@@ -19,6 +19,7 @@ public class ShopResponseField {
 
     public Shop getShop() {
         return shop;
+        
     }
 
     public void setShop(Shop shop) {
