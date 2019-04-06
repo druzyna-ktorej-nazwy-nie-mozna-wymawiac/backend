@@ -55,8 +55,6 @@ public class ShopsService {
     }
 
     public Shop getNearestShop(int deviceHour, double deviceLat, double deviceLng){
-       // System.out.println(LocalTime.parse("10:15:30").getHour());
-       // System.out.println(shopRepository.findAll().stream());
         return shopRepository.findAll().stream()
                 .filter(shop -> LocalTime.parse(shop.getClosingHour()).getHour()>=deviceHour)
                 .filter(shop -> LocalTime.parse(shop.getOpeningHour()).getHour()<=deviceHour)
