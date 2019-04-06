@@ -1,16 +1,27 @@
 package com.queuewise.demo.services;
 
+import com.queuewise.demo.models.Hour;
 import com.queuewise.demo.models.Shop;
+import com.queuewise.demo.models.ShopResponseField;
+import com.queuewise.demo.repositories.HoursRepository;
 import com.queuewise.demo.repositories.ShopRepository;
+import org.hibernate.mapping.Collection;
 import org.springframework.stereotype.Service;
+
+import javax.swing.plaf.basic.BasicEditorPaneUI;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ShopsService {
 
     private ShopRepository shopRepository;
+    private HoursRepository hoursRepository;
 
-    public ShopsService(ShopRepository shopRepository) {
+    public ShopsService(ShopRepository shopRepository, HoursRepository hoursRepository) {
         this.shopRepository = shopRepository;
+        this.hoursRepository = hoursRepository;
     }
 
 
@@ -20,20 +31,15 @@ public class ShopsService {
 
     }
 
-    public double getDistanceWithLatAndLng(String lat1 , String lng1, String lat2, String lng2){
+    public double getDistanceWithLatAndLng(double lat1 , double lng1, double lat2, double lng2){
         double R = 6371; // metres
 
-        double latD1 = Double.parseDouble(lat1);
-        double latD2 = Double.parseDouble(lat2);
-        double lngD1 = Double.parseDouble(lng1);
-        double lngD2 = Double.parseDouble(lng2);
-
-        double latRad1 = Math.toRadians(latD1);
-        double latRad2 = Math.toRadians(latD2);
+        double latRad1 = Math.toRadians(lat1);
+        double latRad2 = Math.toRadians(lat2);
 
 
-        double diffLatRad = Math.toRadians(latD2-latD1);
-        double diffLngRad = Math.toRadians(lngD2-lngD1);
+        double diffLatRad = Math.toRadians(lat2-lat1);
+        double diffLngRad = Math.toRadians(lng2-lng1);
         double a = Math.sin(diffLatRad/2)*Math.sin(diffLatRad/2) + Math.cos(latRad1)*Math.cos(latRad2)*Math.sin(diffLngRad/2)*Math.cos(diffLngRad/2);
         double c = 2 * Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
         double distance = R * c ;
@@ -41,14 +47,66 @@ public class ShopsService {
         return  distance;
 
     }
-    public double getDistanceWithLatAndLng(String lat1 , String lng1, Shop shop){
+    public double getDistanceWithLatAndLng(double lat1 , double lng1, Shop shop){
         return  getDistanceWithLatAndLng(lat1,lng1,shop.getLat(),shop.getLng());
 
     }
 
-//    public Shop getNearestShop(String deviceLat, String deviceLng){
-//        return shopRepository.
-//
-//    }
+    public Shop getNearestShop(double deviceLat, double deviceLng){
+        return shopRepository.findAll().stream().min(Comparator.comparing(shop -> getDistanceWithLatAndLng(deviceLat,deviceLng,shop))).get();
+    }
+
+    public ShopResponseField getNearestShopResponse(double deviceLat, double deviceLng){
+        Shop shop = getNearestShop(deviceLat,deviceLng);
+        if(shop!=null){
+            Hour hour = getBestTrafficHourForShop(shop);
+            if(hour!=null){
+                return new ShopResponseField(getNearestShop(deviceLat,deviceLng),hour.getHour(),hour.getTraffic());
+            }
+        }
+        return new ShopResponseField(shop);
+    }
+
+
+    public Shop getBestShopNow(int deviceHour, double deviceLat, double deviceLng){
+
+        List<Shop> shopList = getShopsIn5Km(deviceLat, deviceLng).stream()
+                .filter(shop -> shop.getId() == hoursRepository.findAll().stream().filter(hour -> hour.getHour() == deviceHour)
+                .min(Comparator.comparing(hour -> hour.getTraffic())).get().getShopId()).collect(Collectors.toList());
+
+        if (shopList.size()>0)
+            return shopList.get(0);
+        return null;
+
+    }
+
+    public ShopResponseField getBestShopNowResponse(int deviceHour, double deviceLat, double deviceLng){
+        Shop shop = getBestShopNow(deviceHour,deviceLat,deviceLng);
+        if (shop!=null)
+        {
+            return new ShopResponseField(shop,deviceHour,getCurrentTraficByShopId(deviceHour,shop.getId()));
+        }
+        return null;
+
+    }
+
+    public int getCurrentTraficByShopId(int deviceHour, int shopId){
+        return hoursRepository.findAll().stream().filter(hour -> hour.getShopId()==shopId).filter(hour -> hour.getHour()==deviceHour).collect(Collectors.toList()).get(0).getTraffic();
+    }
+
+    public List<Shop> getShopsIn5Km(double deviceLat, double deviceLng){
+        return shopRepository.findAll().stream().filter(shop -> getDistanceWithLatAndLng(deviceLat,deviceLng,shop)<50000).collect(Collectors.toList());
+    }
+
+    public Hour getBestTrafficHourForShop(Shop shop){
+        Hour bestHour = hoursRepository.findAll().stream().filter(hour -> hour.getShopId()==shop.getId()).min(Comparator.comparing(hour -> hour.getTraffic())).get();
+
+
+        return bestHour;
+
+    }
+
+
+
 
 }

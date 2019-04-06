@@ -20,8 +20,8 @@ public class Shop {
     @Column(name = "closing_hour")
     private String closingHour;
 
-    private String lat;
-    private String lng;
+    private double lat;
+    private double lng;
 
     @Column(name = "open_sundays")
     private Boolean openOnSundays;
@@ -71,19 +71,19 @@ public class Shop {
         this.closingHour = closingHour;
     }
 
-    public String getLat() {
+    public double getLat() {
         return lat;
     }
 
-    public void setLat(String lat) {
+    public void setLat(double lat) {
         this.lat = lat;
     }
 
-    public String getLng() {
+    public double getLng() {
         return lng;
     }
 
-    public void setLng(String lng) {
+    public void setLng(double lng) {
         this.lng = lng;
     }
 
