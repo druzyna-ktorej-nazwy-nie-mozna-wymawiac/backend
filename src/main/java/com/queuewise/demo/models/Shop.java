@@ -1,5 +1,6 @@
 package com.queuewise.demo.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.persistence.Column;
@@ -109,6 +110,7 @@ public class Shop {
         this.query = query;
     }
 
+    @JsonIgnore
     public String getData() {
         return data;
     }
@@ -117,6 +119,7 @@ public class Shop {
         this.data = data;
     }
 
+    @JsonIgnore
     public ShopTrafficData getTrafficData() {
 
         if (getData() == null || getData().equals("")) {
