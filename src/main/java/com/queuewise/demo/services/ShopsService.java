@@ -80,14 +80,17 @@ public class ShopsService {
         for (Shop s : shopList) {
             ShopTrafficData trafficData = s.getTrafficData();
 
-             allHours.addAll(trafficData.getData().stream().map((hour -> hour.setShopId(s.getId()))).collect(Collectors.toList()));
+             allHours.addAll(trafficData.getData().stream().map((hour -> hour.setShopId(s.getId())))
+                     .filter(hour -> deviceHour >= LocalTime.parse(s.getOpeningHour()).getHour())
+                     .filter(hour -> deviceHour<= LocalTime.parse(s.getClosingHour()).getHour())
+                     .collect(Collectors.toList()));
         }
 
 
-        Hour betHour = allHours.stream().filter(hour -> hour.getHour() == deviceHour)
+        Hour bestHour = allHours.stream().filter(hour -> hour.getHour() == deviceHour)
                 .min(Comparator.comparing(hour -> hour.getTraffic())).get();
 
-        shopList.stream().filter(shop -> shop.getId().equals(betHour.getShopId())).collect(Collectors.toList());
+        shopList.stream().filter(shop -> shop.getId().equals(bestHour.getShopId())).collect(Collectors.toList());
 
         if (shopList.size()>0)
             return shopList.get(0);
@@ -124,7 +127,7 @@ public class ShopsService {
     }
 
     public List<Shop> getShopsIn5Km(double deviceLat, double deviceLng){
-        return shopRepository.findAll().stream().filter(shop -> getDistanceWithLatAndLng(deviceLat,deviceLng,shop)<50000).collect(Collectors.toList());
+        return shopRepository.findAll().stream().filter(shop -> getDistanceWithLatAndLng(deviceLat,deviceLng,shop)<5000).collect(Collectors.toList());
     }
 
     public Hour getBestTrafficHourForShop(Shop shop){
