@@ -61,10 +61,13 @@ public class ShopsService {
 
     public ShopResponseField getNearestShopResponse(int deviceHour, double deviceLat, double deviceLng){
         Shop shop = getNearestShop(deviceHour,deviceLat,deviceLng);
+
+        double distance = getDistanceWithLatAndLng(deviceLat, deviceLng, shop.getLat(), shop.getLng());
+
         if(shop!=null){
             Hour hour = getBestTrafficHourForShop(shop);
             if(hour!=null){
-                return new ShopResponseField(getNearestShop(deviceHour,deviceLat,deviceLng),hour.getHour(),hour.getTraffic());
+                return new ShopResponseField(getNearestShop(deviceHour,deviceLat,deviceLng),hour.getHour(),hour.getTraffic(), distance);
             }
         }
         return new ShopResponseField(shop);
@@ -97,10 +100,14 @@ public class ShopsService {
 
     public ShopResponseField getBestShopNowResponse(int deviceHour, double deviceLat, double deviceLng){
         Shop shop = getBestShopNow(deviceHour,deviceLat,deviceLng);
-        shop.setData("");
+//        shop.setData("");
+
+        double distance = getDistanceWithLatAndLng(deviceLat, deviceLng, shop.getLat(), shop.getLng());
+
+
         if (shop!=null)
         {
-            return new ShopResponseField(shop,deviceHour,getCurrentTraficByShopId(deviceHour,shop.getId()));
+            return new ShopResponseField(shop,deviceHour,getCurrentTraficByShopId(deviceHour,shop.getId()), distance);
         }
         return null;
 
