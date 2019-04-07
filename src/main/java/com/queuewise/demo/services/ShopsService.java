@@ -65,7 +65,7 @@ public class ShopsService {
         double distance = getDistanceWithLatAndLng(deviceLat, deviceLng, shop.getLat(), shop.getLng());
 
         if(shop!=null){
-            Hour hour = getBestTrafficHourForShop(shop);
+            Hour hour = getBestTrafficHourForShop(shop,deviceHour);
             if(hour!=null){
                 return new ShopResponseField(getNearestShop(deviceHour,deviceLat,deviceLng),hour.getHour(),hour.getTraffic(), distance);
             }
@@ -73,24 +73,34 @@ public class ShopsService {
         return new ShopResponseField(shop);
     }
 
+//    public Shop getBestOverallShop(int deviceHour, double deviceLat, double deviceLng){
+//
+//        return new Shop();
+//
+//    }
+
+
 
     public Shop getBestShopNow(int deviceHour, double deviceLat, double deviceLng){
 
-        List<Shop> shopList = getShopsIn5Km(deviceLat, deviceLng);
+        List<Shop> shopList = getShopsInYKm(deviceLat, deviceLng,5000);
 
         List<Hour> allHours = new ArrayList<>();
 
         for (Shop s : shopList) {
             ShopTrafficData trafficData = s.getTrafficData();
 
-             allHours.addAll(trafficData.getData().stream().map((hour -> hour.setShopId(s.getId()))).collect(Collectors.toList()));
+             allHours.addAll(trafficData.getData().stream().map((hour -> hour.setShopId(s.getId())))
+                     .filter(hour -> deviceHour >= LocalTime.parse(s.getOpeningHour()).getHour())
+                     .filter(hour -> deviceHour<= LocalTime.parse(s.getClosingHour()).getHour())
+                     .collect(Collectors.toList()));
         }
 
 
-        Hour betHour = allHours.stream().filter(hour -> hour.getHour() == deviceHour)
+        Hour bestHour = allHours.stream().filter(hour -> hour.getHour() == deviceHour)
                 .min(Comparator.comparing(hour -> hour.getTraffic())).get();
 
-        shopList.stream().filter(shop -> shop.getId().equals(betHour.getShopId())).collect(Collectors.toList());
+        shopList.stream().filter(shop -> shop.getId().equals(bestHour.getShopId())).collect(Collectors.toList());
 
         if (shopList.size()>0)
             return shopList.get(0);
@@ -100,8 +110,6 @@ public class ShopsService {
 
     public ShopResponseField getBestShopNowResponse(int deviceHour, double deviceLat, double deviceLng){
         Shop shop = getBestShopNow(deviceHour,deviceLat,deviceLng);
-//        shop.setData("");
-
         double distance = getDistanceWithLatAndLng(deviceLat, deviceLng, shop.getLat(), shop.getLng());
 
 
@@ -130,17 +138,18 @@ public class ShopsService {
 //        return hoursRepository.findAll().stream().filter(hour -> hour.getShopId()==shopId).filter(hour -> hour.getHour()==deviceHour).collect(Collectors.toList()).get(0).getTraffic();
     }
 
-    public List<Shop> getShopsIn5Km(double deviceLat, double deviceLng){
-        return shopRepository.findAll().stream().filter(shop -> getDistanceWithLatAndLng(deviceLat,deviceLng,shop)<50000).collect(Collectors.toList());
+    public List<Shop> getShopsInYKm(double deviceLat, double deviceLng, int Y){
+        return shopRepository.findAll().stream().filter(shop -> getDistanceWithLatAndLng(deviceLat,deviceLng,shop)<Y).collect(Collectors.toList());
     }
 
-    public Hour getBestTrafficHourForShop(Shop shop){
+    public Hour getBestTrafficHourForShop(Shop shop, int deviceHour){
         try {
             ShopTrafficData trafficData = mapper.readValue(shop.getData(), ShopTrafficData.class);
 
             Hour bestHour = trafficData.getData().stream()
                     .filter(hour -> hour.getHour()>=LocalTime.parse(shop.getOpeningHour()).getHour())
                     .filter(hour -> hour.getHour()<=LocalTime.parse(shop.getClosingHour()).getHour())
+                    .filter(hour -> hour.getHour()>deviceHour)
                     .min(Comparator.comparing(hour -> hour.getTraffic())).get();
 
 
