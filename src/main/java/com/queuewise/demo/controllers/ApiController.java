@@ -30,7 +30,7 @@ public class ApiController {
 
 
         BestShopResponse response = new BestShopResponse();
-        response.setBestNearest(shopsService.getNearestShopResponse(lat,lng));
+        response.setBestNearest(shopsService.getNearestShopResponse(dateTime.getHour(),lat,lng));
         response.setBestNow(shopsService.getBestShopNowResponse(dateTime.getHour(),lat,lng));
 
         return response;
