@@ -1,6 +1,7 @@
 package com.queuewise.demo.controllers;
 
 import com.queuewise.demo.services.DataGenerationService;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,6 +19,11 @@ public class DataGenerationController {
     @PostMapping("/random")
     public String generateNewData() {
         return dataGenerationService.generateRandomData();
+    }
+
+    @GetMapping("/scraped")
+    public String loadScrapedData() {
+        return dataGenerationService.loadScrapedData();
     }
 
 }

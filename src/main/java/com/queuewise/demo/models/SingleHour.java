@@ -1,26 +1,15 @@
 package com.queuewise.demo.models;
 
-public class Hour {
+public class SingleHour {
 
 
-
-
-    private Integer shopId;
     private Integer day;
     private Integer hour;
     private Integer traffic;
 
-    public Hour() {
+    public SingleHour() {
     }
 
-    public Integer getShopId() {
-        return shopId;
-    }
-
-    public Hour setShopId(Integer shopId) {
-        this.shopId = shopId;
-        return this;
-    }
 
     public Integer getDay() {
         return day;
@@ -45,4 +34,5 @@ public class Hour {
     public void setTraffic(Integer traffic) {
         this.traffic = traffic;
     }
+
 }

@@ -1,9 +1,12 @@
 package com.queuewise.demo.models;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.IOException;
 
 @Entity
 @Table(name = "shops")
@@ -25,6 +28,9 @@ public class Shop {
 
     @Column(name = "open_sundays")
     private Boolean openOnSundays;
+
+    private String query;
+    private String data;
 
     Shop() {
 
@@ -94,5 +100,40 @@ public class Shop {
     public void setOpenOnSundays(Boolean openOnSundays) {
         this.openOnSundays = openOnSundays;
     }
+
+    public String getQuery() {
+        return query;
+    }
+
+    public void setQuery(String query) {
+        this.query = query;
+    }
+
+    public String getData() {
+        return data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
+    }
+
+    public ShopTrafficData getTrafficData() {
+
+        if (getData() == null || getData().equals("")) {
+            return null;
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            ShopTrafficData trafficData = mapper.readValue(getData(), ShopTrafficData.class);
+            return trafficData;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+
+    }
+
 }
 
