@@ -106,7 +106,7 @@ public class ShopsService {
 
     }
 
-    public int getCurrentTraficByShopId(int deviceHour, int shopId){
+    public Integer getCurrentTraficByShopId(int deviceHour, int shopId){
 
 
         try {
@@ -115,7 +115,7 @@ public class ShopsService {
 
         } catch (IOException e) {
                     e.printStackTrace();
-                    return -1;
+                    return null;
         }
 
 
