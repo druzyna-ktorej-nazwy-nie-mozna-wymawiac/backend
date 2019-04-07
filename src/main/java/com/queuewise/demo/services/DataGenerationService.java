@@ -1,10 +1,7 @@
 package com.queuewise.demo.services;
 
 import com.queuewise.demo.models.Hour;
-import com.queuewise.demo.models.ScrapedDataResponse;
 import com.queuewise.demo.models.Shop;
-import com.queuewise.demo.models.SingleHour;
-import com.queuewise.demo.repositories.HoursRepository;
 import com.queuewise.demo.repositories.ShopRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -19,20 +16,17 @@ public class DataGenerationService {
 
 
     private ShopRepository shopRepository;
-    private HoursRepository hoursRepository;
 
     private Random rng = new Random(123);
 
-    public DataGenerationService(ShopRepository shopRepository, HoursRepository hoursRepository) {
+    public DataGenerationService(ShopRepository shopRepository) {
         this.shopRepository = shopRepository;
-        this.hoursRepository = hoursRepository;
     }
 
 
     public String generateRandomData() {
 
         List<Shop> shopList = shopRepository.findAll();
-        hoursRepository.deleteAll();
 
         List<Hour> hourList = new ArrayList<>(shopList.size() * 24 * 7);
 
@@ -60,14 +54,14 @@ public class DataGenerationService {
                     }
 
                     // TODO: 06.04.19 auto generate id
-                    Hour newEntry = new Hour(i);
-                    newEntry.setShopId(s.getId());
-                    newEntry.setDay(d);
-                    newEntry.setHour(h);
-                    newEntry.setTraffic(randomTraffic);
+//                    Hour newEntry = new Hour();
+//                    newEntry.setShopId(s.getId());
+//                    newEntry.setDay(d);
+//                    newEntry.setHour(h);
+//                    newEntry.setTraffic(randomTraffic);
 
                     i++;
-                    hourList.add(newEntry);
+//                    hourList.add(newEntry);
 
                 }
 
@@ -77,10 +71,9 @@ public class DataGenerationService {
 
         }
 
-        hoursRepository.saveAll(hourList);
 
 
-        return "OK";
+        return "NOT WORKING";
     }
 
 

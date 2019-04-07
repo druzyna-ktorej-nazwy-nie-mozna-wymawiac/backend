@@ -1,9 +1,12 @@
 package com.queuewise.demo.models;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.IOException;
 
 @Entity
 @Table(name = "shops")
@@ -112,6 +115,24 @@ public class Shop {
 
     public void setData(String data) {
         this.data = data;
+    }
+
+    public ShopTrafficData getTrafficData() {
+
+        if (getData() == null || getData().equals("")) {
+            return null;
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            ShopTrafficData trafficData = mapper.readValue(getData(), ShopTrafficData.class);
+            return trafficData;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+
     }
 
 }
