@@ -26,6 +26,9 @@ public class Shop {
     @Column(name = "open_sundays")
     private Boolean openOnSundays;
 
+    private String query;
+    private String data;
+
     Shop() {
 
     }
@@ -94,5 +97,22 @@ public class Shop {
     public void setOpenOnSundays(Boolean openOnSundays) {
         this.openOnSundays = openOnSundays;
     }
+
+    public String getQuery() {
+        return query;
+    }
+
+    public void setQuery(String query) {
+        this.query = query;
+    }
+
+    public String getData() {
+        return data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
+    }
+
 }
 
