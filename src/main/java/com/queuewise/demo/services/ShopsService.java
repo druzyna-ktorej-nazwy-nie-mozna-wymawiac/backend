@@ -7,9 +7,11 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,22 +54,37 @@ public class ShopsService {
 
     }
 
-    public Shop getNearestShop(int deviceHour, double deviceLat, double deviceLng){
-        return shopRepository.findAll().stream()
-                .filter(shop -> LocalTime.parse(shop.getClosingHour()).getHour()>=deviceHour)
-                .filter(shop -> LocalTime.parse(shop.getOpeningHour()).getHour()<=deviceHour)
-                .min(Comparator.comparing(shop -> getDistanceWithLatAndLng(deviceLat,deviceLng,shop))).get();
+    public Shop getNearestShop(int deviceHour, int deviceDay, double deviceLat, double deviceLng){
+
+        Optional<Shop> optionalShop = shopRepository.findAll().stream()
+                .filter(shop -> LocalTime.parse(shop.getClosingHour()).getHour() >= deviceHour)
+                .filter(shop -> LocalTime.parse(shop.getOpeningHour()).getHour() <= deviceHour)
+                .filter(shop -> deviceDay != 7 || shop.isOpenOnSundays())
+                .min(Comparator.comparing(shop -> getDistanceWithLatAndLng(deviceLat, deviceLng, shop)));
+
+        if(optionalShop.isPresent()) {
+
+            if(deviceDay != 7 || optionalShop.get().isOpenOnSundays()) {
+                return optionalShop.get();
+            }
+        }
+
+        return null;
+
     }
 
-    public ShopResponseField getNearestShopResponse(int deviceHour, double deviceLat, double deviceLng){
-        Shop shop = getNearestShop(deviceHour,deviceLat,deviceLng);
+    public ShopResponseField getNearestShopResponse(int deviceHour, int deviceDay, double deviceLat, double deviceLng){
+        Shop shop = getNearestShop(deviceHour, deviceDay,deviceLat,deviceLng);
 
-        double distance = getDistanceWithLatAndLng(deviceLat, deviceLng, shop.getLat(), shop.getLng());
+//        if (deviceDay == 7 && !shop.isOpenOnSundays()) {
+//            shop = null;
+//        }
 
         if(shop!=null){
+            double distance = getDistanceWithLatAndLng(deviceLat, deviceLng, shop.getLat(), shop.getLng());
             Hour hour = getBestTrafficHourForShop(shop,deviceHour);
             if(hour!=null){
-                return new ShopResponseField(getNearestShop(deviceHour,deviceLat,deviceLng),hour.getHour(),hour.getTraffic(), distance);
+                return new ShopResponseField(getNearestShop(deviceHour, deviceDay,deviceLat,deviceLng),hour.getHour(),hour.getTraffic(), distance);
             }
         }
         return new ShopResponseField(shop);
@@ -81,7 +98,7 @@ public class ShopsService {
 
 
 
-    public Shop getBestShopNow(int deviceHour, double deviceLat, double deviceLng){
+    public Shop getBestShopNow(int deviceHour,int deviceDay,  double deviceLat, double deviceLng){
 
         List<Shop> shopList = getShopsInYKm(deviceLat, deviceLng,5000);
 
@@ -89,18 +106,29 @@ public class ShopsService {
 
         for (Shop s : shopList) {
             ShopTrafficData trafficData = s.getTrafficData();
+            System.out.println(deviceDay);
+            if(deviceDay==7 && !s.isOpenOnSundays())
+                continue;
 
              allHours.addAll(trafficData.getData().stream().map((hour -> hour.setShopId(s.getId())))
                      .filter(hour -> deviceHour >= LocalTime.parse(s.getOpeningHour()).getHour())
                      .filter(hour -> deviceHour<= LocalTime.parse(s.getClosingHour()).getHour())
+                     .filter(hour -> hour.getDay() == deviceDay)
+                     .filter(hour -> deviceDay != 7 || s.isOpenOnSundays())
                      .collect(Collectors.toList()));
         }
 
 
-        Hour bestHour = allHours.stream().filter(hour -> hour.getHour() == deviceHour)
-                .min(Comparator.comparing(hour -> hour.getTraffic())).get();
+        Optional<Hour> bestHourOpt = allHours.stream().filter(hour -> hour.getHour() == deviceHour)
+                .min(Comparator.comparing(hour -> hour.getTraffic()));
 
-        shopList.stream().filter(shop -> shop.getId().equals(bestHour.getShopId())).collect(Collectors.toList());
+        if(bestHourOpt.isPresent()) {
+
+            shopList.stream().filter(shop -> shop.getId().equals(bestHourOpt.get().getShopId())).collect(Collectors.toList());
+        } else {
+            return null;
+        }
+
 
         if (shopList.size()>0)
             return shopList.get(0);
@@ -108,13 +136,16 @@ public class ShopsService {
 
     }
 
-    public ShopResponseField getBestShopNowResponse(int deviceHour, double deviceLat, double deviceLng){
-        Shop shop = getBestShopNow(deviceHour,deviceLat,deviceLng);
-        double distance = getDistanceWithLatAndLng(deviceLat, deviceLng, shop.getLat(), shop.getLng());
+    public ShopResponseField getBestShopNowResponse(int deviceHour, int deviceDay, double deviceLat, double deviceLng){
+        Shop shop = getBestShopNow(deviceHour,deviceDay,deviceLat,deviceLng);
+
+
 
 
         if (shop!=null)
         {
+            System.out.println(shop.getName());
+            double distance = getDistanceWithLatAndLng(deviceLat, deviceLng, shop.getLat(), shop.getLng());
             return new ShopResponseField(shop,deviceHour,getCurrentTraficByShopId(deviceHour,shop.getId()), distance);
         }
         return null;
@@ -168,6 +199,19 @@ public class ShopsService {
 
         return null;
 
+    }
+
+
+    public BestShopResponse getResponse(String rawDateTime, double lat, double lng) {
+        ZonedDateTime dateTime = ZonedDateTime.parse(rawDateTime);
+
+
+        BestShopResponse response = new BestShopResponse();
+        response.setNearest(getNearestShopResponse(dateTime.getHour(),dateTime.getDayOfWeek().getValue(),lat,lng));
+        response.setBestNow(getBestShopNowResponse(dateTime.getHour(),dateTime.getDayOfWeek().getValue(),lat,lng));
+
+
+        return response;
     }
 
 

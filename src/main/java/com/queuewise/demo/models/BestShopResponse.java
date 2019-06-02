@@ -3,11 +3,7 @@ package com.queuewise.demo.models;
 public class BestShopResponse {
 
     private ShopResponseField bestNearest;
-
-
     private ShopResponseField bestNow;
-
-
     private ShopResponseField bestOverall;
 
 
@@ -19,7 +15,7 @@ public class BestShopResponse {
         return bestNearest;
     }
 
-    public void setBestNearest(ShopResponseField bestNearest) {
+    public void setNearest(ShopResponseField bestNearest) {
         this.bestNearest = bestNearest;
     }
 

@@ -43,8 +43,10 @@ public class ShopResponseField {
         this.bestTraffic = bestTraffic;
     }
 
-    public int getPredictedWaitTimeInSeconds() {
-
+    public Integer getPredictedWaitTimeInSeconds() {
+        if(bestTraffic == null) {
+            return null;
+        }
         return (int) (30 + bestTraffic * 0.3);
     }
 
